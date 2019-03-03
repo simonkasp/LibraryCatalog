@@ -4,6 +4,6 @@ namespace LibraryCatalog.LoginRegister
 {
     public interface ILogin
     {
-        IBaseUser SignIn(string username, string password);
+        BaseUser SignIn(string username, string password);
     }
 }

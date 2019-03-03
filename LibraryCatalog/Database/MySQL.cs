@@ -49,7 +49,7 @@ namespace LibraryCatalog.Database
                 connection.Close();
             }
         }
-        public void AddDataUser<T>(T user) where T : IBaseUser
+        public void AddDataUser<T>(T user) where T : IRegularUser
         {
             try
             {
@@ -102,20 +102,146 @@ namespace LibraryCatalog.Database
             }
         }
 
-        public int CheckUserRole(string username)
+        public BaseUser GetDataUser(string username)
         {
             Connect();
-
+            BaseUser user = new BaseUser(); ;
             var command = connection.CreateCommand();
 
-            command.CommandText = "SELECT userRole from librarycatalog.users WHERE username=@username";
+            command.CommandText = "SELECT *  FROM librarycatalog.users WHERE username=@username";
             command.Parameters.AddWithValue("@username", username);
 
-            var userRole = command.ExecuteScalar();
+            MySqlDataReader reader = command.ExecuteReader();
 
-            connection.Close();
+            while (reader.Read())
+            {
+                user.ID = (int)reader["id"];
+                user.Username = (string)reader["username"];
+                user.Name = (string)reader["firstName"];
+                user.LastName = (string)reader["lastName"];
+                user.Password = (string)reader["password"];
+                user.DateRegistred = (string)reader["registredDate"];
+                user.Role = (int)reader["userRole"];
+                user.IsLoggedIn = true;
+            }
 
-            return Convert.ToInt32(userRole);
+            return user;
+        }
+
+        public void DeleteData(string query, int id)
+        {
+            try
+            {
+                Connect();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = query;
+
+                command.Parameters.AddWithValue("@id", id);
+                command.ExecuteNonQuery();
+
+                Console.WriteLine("Record has been deleted.");
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
+
+        public void ShowDataAll(string query)
+        {
+            try
+            {
+                Connect();
+                var command = connection.CreateCommand();
+                command.CommandText = query;
+
+                MySqlDataReader reader = command.ExecuteReader();
+
+                var columns = new List<string>();
+
+                using (reader)
+                {
+                    while (reader.Read())
+                    {
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            columns.Add(reader.GetName(i));
+                            Console.WriteLine(columns[i] + ": " + reader.GetValue(i));
+                        }
+                        Console.WriteLine();
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
+
+        public void ShowDataUser(string query, int id)
+        {
+            try
+            {
+                Connect();
+
+                var command = connection.CreateCommand();
+                command.CommandText = query;
+                command.Parameters.AddWithValue("@id", id);
+
+                var result = command.ExecuteScalar();
+
+                if (result == null)
+                {
+                    Console.WriteLine("User was not found.");
+                }
+
+                MySqlDataReader reader = command.ExecuteReader();
+
+
+                while (reader.HasRows)
+                {
+
+                    var columns = new List<string>();
+
+                    while (reader.Read())
+                    {
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            columns.Add(reader.GetName(i));
+                            Console.WriteLine(columns[i] + ": " + reader.GetValue(i));
+                        }
+                    }
+
+                    Console.WriteLine();
+                    reader.NextResult();
+                    Console.WriteLine("Taken books: ");
+
+                    while (reader.Read())
+                    {
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            Console.WriteLine(reader.GetValue(i));
+                        }
+                    }
+                    connection.Close();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
         }
     }

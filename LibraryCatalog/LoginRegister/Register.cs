@@ -12,7 +12,7 @@ namespace LibraryCatalog.LoginRegister
 
         }
 
-        public RegularUser CreateUser(string name, string lastName, string username, string password, string confirmPassword)
+        public IRegularUser CreateUser(string name, string lastName, string username, string password, string confirmPassword)
         {
             RegularUser user = new RegularUser(name, lastName, username, password);
             //RegularUser user = new RegularUser();
@@ -30,7 +30,7 @@ namespace LibraryCatalog.LoginRegister
 
             return user;
         }
-        public void SignUp(RegularUser user)
+        public void SignUp(IRegularUser user)
         {
             _database.AddDataUser(user);
         }

@@ -48,6 +48,12 @@ namespace LibraryCatalog.Books
                 numberOfPages = value;
             }
         }
+
+        public Book()
+        {
+
+        }
+
         public Book(int id)
         {
             ID = id;

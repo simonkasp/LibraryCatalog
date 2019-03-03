@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using LibraryCatalog.Users;
 using LibraryCatalog.LoginRegister;
 using LibraryCatalog.Database;
+using ConsoleUI.Menu;
 
 namespace ConsoleUI
 {

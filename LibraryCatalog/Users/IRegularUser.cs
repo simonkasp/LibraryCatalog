@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace LibraryCatalog.Users
 {
-    public interface IRegularUser
+    public interface IRegularUser : IBaseUser
     {
         void ReserveBook(Book book, IRegularUser user);
         void TakeBook(Book book, IRegularUser user);

@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="Application.cs" />
     <Compile Include="Container.cs" />
+    <Compile Include="Menu\AdminMenu.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -76,5 +77,6 @@
       <Name>LibraryCatalog</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

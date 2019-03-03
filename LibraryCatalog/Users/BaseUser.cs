@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LibraryCatalog.Database;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +14,16 @@ namespace LibraryCatalog.Users
         public string LastName { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
+        public string DateRegistred { get; set; }
+        public int Role { get; set; }
+        public bool IsLoggedIn { get; set; }
+
+        protected readonly IMySQL _database;
+
+        public BaseUser(IMySQL database)
+        {
+            _database = database;
+        }
 
         public BaseUser()
         {
@@ -32,12 +43,15 @@ namespace LibraryCatalog.Users
 
         public void ShowAvailableBooks()
         {
-            throw new NotImplementedException();
+            var query = "";
+            _database.ShowDataAll(query);
         }
 
         public void ShowBooks()
         {
-            throw new NotImplementedException();
+            var query = "SELECT id, title, numberOfPages, ISBN, isCheckedOut, isReserved FROM librarycatalog.books";
+
+            _database.ShowDataAll(query);
         }
     }
 }

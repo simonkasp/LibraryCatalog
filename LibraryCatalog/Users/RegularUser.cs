@@ -1,4 +1,5 @@
 ﻿using LibraryCatalog.Books;
+using LibraryCatalog.Database;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,12 @@ namespace LibraryCatalog.Users
     public class RegularUser : BaseUser, IRegularUser
     {
         public RegularUser()
+        {
+
+        }
+
+        public RegularUser(IMySQL database)
+            :base(database)
         {
 
         }

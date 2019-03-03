@@ -18,35 +18,21 @@ namespace LibraryCatalog.LoginRegister
 
         }
 
-        public IBaseUser SignIn(string username, string password)
+        public BaseUser SignIn(string username, string password)
         {
-            IBaseUser user;           
+            BaseUser user = new BaseUser();
 
             var query1 = "SELECT username FROM librarycatalog.users WHERE username=@username";
             var query2 = "SELECT password FROM librarycatalog.users WHERE username=@username";
 
             if (CheckIfDataExists(query1, username) == true && CheckIfDataExists(query2, password) == true)
             {
-                var role = CheckUserRole(username);
-
-                switch (role)
-                {
-                    case 0:
-                        return user = new RegularUser(username, password);
-                    default:
-                        return user = new AdminUser(username, password);
-                }
-
+                return user = _database.GetDataUser(username);
             }
             else
             {
                 throw new ArgumentException("Username or password is incorrect.");
             }
-        }
-
-        private int CheckUserRole(string username)
-        {
-            return _database.CheckUserRole(username);
         }
 
     }
