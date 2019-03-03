@@ -60,7 +60,7 @@ namespace LibraryCatalog.Users
                         "JOIN librarycatalog.books " +
                         "ON librarycatalog.users.id = librarycatalog.books.takenByUserID;";
 
-            _database.ShowDataOne(query, id);
+            _database.ShowDataUser(query, id);
         }
     }
 }

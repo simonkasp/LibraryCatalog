@@ -5,21 +5,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace LibraryCatalog.LoginRegister
 {
-    public class LoginRegistrationValidation
+    public class LoginRegistrationValidation : ILoginRegistrationValidation
     {
         protected readonly IMySQL _database;
-        protected enum DataType { username, password };
 
         public LoginRegistrationValidation(IMySQL database)
         {
             _database = database;
         }
 
-        protected bool CheckIfDataExists(string query, string data)
-        {          
-            return _database.CheckDataIfExists(query, data);
+        public bool CheckIfUsernameExists(string query, string data)
+        {
+            return _database.CheckDataIfUsernameExists(query, data);
+        }
+
+        public bool CheckIfUserExists(string query, string username, string password)
+        {
+            return _database.CheckDataIfUserExists(query, username, password);
         }
     }
 }

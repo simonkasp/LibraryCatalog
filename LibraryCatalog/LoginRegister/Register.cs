@@ -15,10 +15,10 @@ namespace LibraryCatalog.LoginRegister
         public IRegularUser CreateUser(string name, string lastName, string username, string password, string confirmPassword)
         {
             RegularUser user = new RegularUser(name, lastName, username, password);
-            //RegularUser user = new RegularUser();
+
             var query = "SELECT username FROM librarycatalog.users WHERE username=@username";
 
-            if (CheckIfDataExists(query, username) == false)
+            if (CheckIfUsernameExists(query, username) == false)
                 user.Name = username;
             else
                 throw new ArgumentException("This user already exists.");

@@ -36,15 +36,16 @@ namespace LibraryCatalog.Users
             Password = password;
         }
 
-        public void SelectBookByName()
+        public void SelectBookByName(string bookName)
         {
-            throw new NotImplementedException();
+            _database.SelectDataBook(bookName);
         }
 
         public void ShowAvailableBooks()
         {
-            var query = "";
-            _database.ShowDataAll(query);
+            var query = "SELECT id, title, numberOfPages, ISBN, isCheckedOut, isReserved FROM librarycatalog.books " +
+                        "WHERE isReserved = @isReserved AND isCheckedOut = @isCheckedOut";
+            _database.SelectDataAvailableBooks(query);
         }
 
         public void ShowBooks()

@@ -10,10 +10,8 @@ namespace LibraryCatalog.LoginRegister
 {
     public class Login : LoginRegistrationValidation, ILogin
     {
-        
-
         public Login(IMySQL database)
-            : base(database)
+            :base(database)
         {
 
         }
@@ -22,10 +20,9 @@ namespace LibraryCatalog.LoginRegister
         {
             BaseUser user = new BaseUser();
 
-            var query1 = "SELECT username FROM librarycatalog.users WHERE username=@username";
-            var query2 = "SELECT password FROM librarycatalog.users WHERE username=@username";
+            var query = "SELECT username FROM librarycatalog.users WHERE username=@username AND password=@password";
 
-            if (CheckIfDataExists(query1, username) == true && CheckIfDataExists(query2, password) == true)
+            if (CheckIfUserExists(query, username, password))
             {
                 return user = _database.GetDataUser(username);
             }

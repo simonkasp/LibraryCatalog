@@ -93,25 +93,6 @@ namespace ConsoleUI
 
             do
             {
-                if (UserExists(_user) && _user.IsLoggedIn)
-                {                    
-                    if (Choice == "1")
-                    {
-                        DisplayBooks();
-                    }
-                    else if (Choice == "2")
-                    {
-                        DisplayAvailableBooks();
-                    }
-                    else if (Choice == "3")
-                    {
-                        SearchBookByName();
-                    }
-                    if(_user.Role == 1)
-                    {
-                        AddBook();
-                    }
-                }
 
                 if (Choice == "0")
                 {
@@ -166,71 +147,15 @@ namespace ConsoleUI
             if (_user.Role == 0)
             {
                 _regularUser = Authentication<RegularUser>(_user);
-                
-                //RegularMenu();
+                var menu = new RegularMenu(_regularFunction, _regularUser);
+                menu.Menu();
             }
             else
             {
                 _adminUser = Authentication<AdminUser>(_user);
                 var menu = new AdminMenu(_adminFunction, _adminUser);
-                //AdminMenu();
                 menu.Menu();
             }
-        }
-
-        public void DisplayBooks()
-        {
-            _adminFunction.ShowBooks();
-        }
-
-        public void DisplayAvailableBooks()
-        {
-            _baseUser.ShowAvailableBooks();
-        }
-
-        public void SearchBookByName()
-        {
-            Console.Write("Enter name of book: ");
-            var bookName = Console.ReadLine();
-
-            _user.SelectBookByName();
-        }
-
-        public void AddBook()
-        {
-            
-            Console.WriteLine("Book info");
-            Console.Write("Enter book name: ");
-            var title = Console.ReadLine();
-
-            Console.Write("Enter number of pages: ");
-            var numOfPages = Convert.ToInt32(Console.ReadLine());
-
-            Console.Write("Enter ISBN: ");
-            var ISBN =  Console.ReadLine();
-
-            var book = new Book(title, numOfPages, ISBN);
-            _adminUser.AddBook(book);
-        }
-
-        public void DeleteBook()
-        {
-
-        }
-
-        public void ShowAllUsers()
-        {
-
-        }
-
-        public void ShowOneUser()
-        {
-
-        }
-
-        public void DeleteOneUser()
-        {
-
         }
 
         private bool UserExists<T>(T user) where T : BaseUser

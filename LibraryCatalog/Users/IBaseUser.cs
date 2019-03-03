@@ -16,7 +16,7 @@ namespace LibraryCatalog.Users
 
         void ShowBooks();
         void ShowAvailableBooks();
-        void SelectBookByName();
+        void SelectBookByName(string bookName);
 
     }
 }

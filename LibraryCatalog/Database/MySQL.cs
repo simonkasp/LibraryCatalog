@@ -14,6 +14,7 @@ namespace LibraryCatalog.Database
     {
         private string db;
         private MySqlConnection connection;
+        private enum IdentificationType { username, password};
 
         private void Connect()
         {
@@ -75,7 +76,13 @@ namespace LibraryCatalog.Database
                 Console.WriteLine(ex.Message);
             }
         }
-        public bool CheckDataIfExists(string query, string data)
+
+        public bool CheckDataIfUsernameExists(string query, string data)
+        {
+            return CheckDataIfExists(query, IdentificationType.username, data);
+        }
+        
+        public bool CheckDataIfUserExists(string query, string username, string password)
         {
             try
             {
@@ -83,7 +90,35 @@ namespace LibraryCatalog.Database
 
                 var command = connection.CreateCommand();
                 command.CommandText = query;
-                command.Parameters.AddWithValue("@username", data);
+                command.Parameters.AddWithValue("@username", username);
+                command.Parameters.AddWithValue("@password", password);
+
+                var result = command.ExecuteScalar();
+
+                return result != null ? true : false;
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return false;
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
+
+        private bool CheckDataIfExists(string query, IdentificationType identificationType, string data)
+        {
+            try
+            {
+                Connect();
+
+                var command = connection.CreateCommand();
+                command.CommandText = query;
+                command.Parameters.AddWithValue("@"+identificationType, data);
 
                 var result = command.ExecuteScalar();
 
@@ -227,13 +262,7 @@ namespace LibraryCatalog.Database
                     reader.NextResult();
                     Console.WriteLine("Taken books: ");
 
-                    while (reader.Read())
-                    {
-                        for (int i = 0; i < reader.FieldCount; i++)
-                        {
-                            Console.WriteLine(reader.GetValue(i));
-                        }
-                    }
+                    PrintWithColumns(reader);
                     connection.Close();
 
                 }
@@ -244,5 +273,231 @@ namespace LibraryCatalog.Database
             }
 
         }
+
+        public void ReserveDataBook(int bookID, IRegularUser user)
+        {
+            try
+            {
+                Connect();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = "SELECT id FROM librarycatalog.users WHERE username = @username";
+                command.Parameters.AddWithValue("@username", user.Username);
+                var id = command.ExecuteScalar();
+
+                command.CommandText = "UPDATE librarycatalog.books SET isReserved = @isReserved, reservedByUserID = @loggedInUserID where id = @id AND isCheckedOut = @isCheckedOut AND isReserved = @CurrentlyIsReserved";
+                command.Parameters.AddWithValue("@id", bookID);
+                command.Parameters.AddWithValue("@loggedInUserID", id);
+                command.Parameters.AddWithValue("@isCheckedOut", "No");
+                command.Parameters.AddWithValue("@isReserved", "Yes");
+                command.Parameters.AddWithValue("@CurrentlyIsReserved", "No");
+                var result = command.ExecuteNonQuery();
+
+                if (result != 0)
+                {
+                    Console.WriteLine("Book has been reserved!");
+
+                }
+
+                else
+                    Console.WriteLine("This book cannot be reserved.");
+
+                
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
+
+        public void CheckInDataBook(int bookID, IRegularUser user)
+        {
+
+            try
+            {
+                Connect();
+                var command = connection.CreateCommand();
+
+                command.CommandText = "UPDATE librarycatalog.books SET isCheckedOut = @isCheckedOut, isReserved = @isReserved, takenByUserID = @takenByUserID where id = @id AND isReserved = @isReserved AND isCheckedOut=@CurrentIsCheckedOut AND takenByUserID = @CurrenttakenByUserID";
+                command.Parameters.AddWithValue("@id", bookID);
+                command.Parameters.AddWithValue("@isCheckedOut", "No");
+                command.Parameters.AddWithValue("@CurrentIsCheckedOut", "Yes");
+                command.Parameters.AddWithValue("@takenByUserID", 0);
+                command.Parameters.AddWithValue("@CurrenttakenByUserID", user.ID);
+                command.Parameters.AddWithValue("@isReserved", "No");
+
+                var result = command.ExecuteNonQuery();
+
+                if (result != 0)
+                    Console.WriteLine("Book has been returned.");
+                else
+                    Console.WriteLine("You can't return this book.");
+
+                connection.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            
+        }
+
+        public void CheckOutDataBook(int bookID, IRegularUser user)
+        {
+
+            try
+            {
+                Connect();
+                var command = connection.CreateCommand();
+
+                command.CommandText = "SELECT id FROM librarycatalog.users WHERE username=@username";
+                command.Parameters.AddWithValue("@username", user.Username);
+                var loggedInUserID = command.ExecuteScalar();
+
+                command.CommandText = "UPDATE librarycatalog.books SET isCheckedOut = @isCheckedOut, isReserved = @isReserved, takenByUserID = @takenByUserID, reservedByUserId = @reservedByUserId WHERE id = @id AND isReserved = @isReserved OR reservedByUserID = @takenByUserID";
+                command.Parameters.AddWithValue("@id", bookID);
+                command.Parameters.AddWithValue("@isCheckedOut", "Yes");
+                command.Parameters.AddWithValue("@isReserved", "No");
+                command.Parameters.AddWithValue("@takenByUserID", loggedInUserID);
+                command.Parameters.AddWithValue("@reservedByUserID", 0);
+
+                var result = command.ExecuteNonQuery();
+
+                if (result != 0)
+                    Console.WriteLine("Book is checked out.");
+                else
+                    Console.WriteLine("Book cannot be checked out");
+
+                connection.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+        }
+        public void SelectDataRegularUserInfo(IRegularUser user)
+        {
+            try
+            {
+                Connect();
+                var command = connection.CreateCommand();
+                var columns = new List<string>();
+
+                command.CommandText = "SELECT id, title, numberOfPages, ISBN, isCheckedOut, isReserved FROM librarycatalog.books WHERE isReserved = @isReserved AND isCheckedOut = @isCheckedOut";
+                command.Parameters.AddWithValue("@isReserved", "No");
+                command.Parameters.AddWithValue("@isCheckedOut", "No");
+
+                MySqlDataReader reader = command.ExecuteReader();
+
+                PrintWithColumns(reader);
+              
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                connection.Close();
+            }
+
+        }
+
+        public void SelectDataAvailableBooks(string query)
+        {
+            Connect();
+
+            var command = connection.CreateCommand();
+            var columns = new List<string>();
+
+            command.CommandText = query;
+            command.Parameters.AddWithValue("@isReserved", "No");
+            command.Parameters.AddWithValue("@isCheckedOut", "No");
+            command.ExecuteNonQuery();
+
+            var reader = command.ExecuteReader();
+
+            PrintWithColumns(reader);
+        }
+
+        public void SelectDataBooks(string query, string columnName, IRegularUser user)
+        {
+            Connect();
+
+            var command = connection.CreateCommand();
+            var columns = new List<string>();
+
+            command.CommandText = query;
+            command.Parameters.AddWithValue("@"+columnName, user.ID);
+            command.ExecuteNonQuery();
+
+            var reader = command.ExecuteReader();
+
+            if (reader.HasRows)
+            {
+                PrintWithColumns(reader);
+            }
+            else
+            {
+                Console.WriteLine("You did not take any book. \n");
+            }
+        }
+
+        public void SelectDataBook(string bookName)
+        {
+            try
+            {
+                Connect();
+                var command = connection.CreateCommand();
+                var columns = new List<string>();
+
+                command.CommandText = "SELECT id, title, ISBN, numberOfPages, isCheckedOut, isReserved FROM librarycatalog.books WHERE title LIKE @word";
+                command.Parameters.AddWithValue("@word", bookName);
+
+                MySqlDataReader reader = command.ExecuteReader();
+
+                if (reader.HasRows)
+                {
+                    PrintWithColumns(reader);
+                }
+                else
+                {
+                    Console.WriteLine("Book was not found.");
+                }
+
+                connection.Close();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        private void PrintWithColumns(MySqlDataReader reader)
+        {
+            var columns = new List<string>();
+
+            using (reader)
+            {
+                while (reader.Read())
+                {
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        columns.Add(reader.GetName(i));
+                        Console.WriteLine(columns[i] + ": " + reader.GetValue(i));
+                    }
+                    Console.WriteLine();
+                }
+            }
+        }
+
     }
 }

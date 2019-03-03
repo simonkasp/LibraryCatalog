@@ -35,29 +35,34 @@ namespace LibraryCatalog.Users
             Password = password;
         }
 
-        public void ReserveBook(Book book, IRegularUser user)
+        public void ReserveBook(int bookID, IRegularUser user)
         {
-            throw new NotImplementedException();
+            _database.ReserveDataBook(bookID, user);
         }
 
-        public void ReturnBook(Book book, IRegularUser user)
+        public void ReturnBook(int bookID, IRegularUser user)
         {
-            throw new NotImplementedException();
+            _database.CheckInDataBook(bookID, user);
         }
 
         public void ShowReservedBooks(IRegularUser user)
         {
-            throw new NotImplementedException();
+            
+            var query = "SELECT id, title, numberOfPages, ISBN FROM librarycatalog.books WHERE reservedByUserID = @reservedByUserID;";
+
+            _database.SelectDataBooks(query, "reservedByUserID", user);
         }
 
         public void ShowTakenBooks(IRegularUser user)
         {
-            throw new NotImplementedException();
+            var query = "SELECT id, title, numberOfPages, ISBN FROM librarycatalog.books WHERE takenByUserID = @takenByUserID;";
+
+            _database.SelectDataBooks(query, "takenByUserID", user);
         }
 
-        public void TakeBook(Book book, IRegularUser user)
+        public void TakeBook(int bookID, IRegularUser user)
         {
-            throw new NotImplementedException();
+            _database.CheckOutDataBook(bookID, user);
         }
     }
 }

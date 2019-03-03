@@ -1,5 +1,4 @@
-﻿using LibraryCatalog.Books;
-using LibraryCatalog.Users;
+﻿using LibraryCatalog.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace ConsoleUI.Menu
 {
-    public class AdminMenu
+    public class RegularMenu
     {
         public string Choice { get; set; }
-        private IAdminUser _adminUser, _admin;
+        private IRegularUser _user, _regular;
 
-        public AdminMenu(IAdminUser admin, IAdminUser adminUser)
+        public RegularMenu(IRegularUser regular, IRegularUser user)
         {
-            _admin = admin;
-            _adminUser = adminUser;
+            _regular = regular;
+            _user = user;
         }
 
         public void Menu()
@@ -25,12 +24,12 @@ namespace ConsoleUI.Menu
             Console.WriteLine("1. Display books");
             Console.WriteLine("2. Display available books");
             Console.WriteLine("3. Search book by name");
-            Console.WriteLine("4. Add book");
-            Console.WriteLine("5. Delete book");
-            Console.WriteLine("6. Show all users");
-            Console.WriteLine("7. Show user");
-            Console.WriteLine("8. Delete user");
-            Console.Write("Please, enter your Choice: ");
+            Console.WriteLine("4. Reserve book");
+            Console.WriteLine("5. Take book");
+            Console.WriteLine("6. Return book");
+            Console.WriteLine("7. Show taken books");
+            Console.WriteLine("8. Show reserved books");
+            Console.Write("Please, enter your choice: ");
             Choice = Console.ReadLine();
             MenuChoices();
         }
@@ -43,6 +42,7 @@ namespace ConsoleUI.Menu
                 {
                     case "0":
                         Console.WriteLine("Thanks for using this application");
+                        Environment.Exit(0);
                         break;
                     case "1":
                         DisplayBooks();
@@ -54,19 +54,19 @@ namespace ConsoleUI.Menu
                         SearchBookByName();
                         break;
                     case "4":
-                        AddBook();
+                        ReserveBook();
                         break;
                     case "5":
-                        DeleteBook();
+                        TakeBook();
                         break;
                     case "6":
-                        ShowAllUsers();
+                        ReturnBook();
                         break;
                     case "7":
-                        ShowUser();
+                        ShowTakenBooks();
                         break;
                     case "8":
-                        DeleteUser();
+                        ShowReservedBooks();
                         break;
                 }
             }
@@ -75,12 +75,13 @@ namespace ConsoleUI.Menu
         }
         public void DisplayBooks()
         {
-            _admin.ShowBooks();
+            _regular.ShowBooks();
             Menu();
         }
         public void DisplayAvailableBooks()
         {
-            _admin.ShowAvailableBooks();
+            _regular.ShowAvailableBooks();
+            Menu();
         }
 
         public void SearchBookByName()
@@ -88,61 +89,43 @@ namespace ConsoleUI.Menu
             Console.Write("Enter name of book: ");
             var bookName = Console.ReadLine();
 
-            _admin.SelectBookByName(bookName);
-
+            _regular.SelectBookByName(bookName);
             Menu();
         }
-
-        public void AddBook()
+        private void ReserveBook()
         {
-            Console.WriteLine("Book info");
-            Console.Write("Enter book name: ");
-            var title = Console.ReadLine();
-
-            Console.Write("Enter number of pages: ");
-            var numOfPages = Convert.ToInt32(Console.ReadLine());
-
-            Console.Write("Enter ISBN: ");
-            var ISBN = Console.ReadLine();
-
-            var book = new Book(title, numOfPages, ISBN);
-
-            _admin.AddBook(book);
-
-            Menu();
-        }
-        public void DeleteBook()
-        {
-            Console.Write("Enter ID of book: ");
+            Console.Write("Enter book id: ");
             int id = Convert.ToInt32(Console.ReadLine());
 
-            var book = new Book(id);
-            _admin.DeleteBook(book);
-
+            _regular.ReserveBook(id, _user);
             Menu();
         }
-        public void ShowAllUsers()
-        {
-            _admin.SelectAllUsers();
 
-            Menu();
-        }
-        public void ShowUser()
+        private void TakeBook()
         {
-            Console.Write("Enter ID of user: ");
-            var id = Convert.ToInt32(Console.ReadLine());
-
-            _admin.SelectUser(id);
-
-            Menu();
-        }
-        public void DeleteUser()
-        {
-            Console.Write("Enter ID of user: ");
+            Console.Write("Enter book id: ");
             int id = Convert.ToInt32(Console.ReadLine());
 
-            _admin.DeleteUser(id);
+            _regular.TakeBook(id, _user);
+            Menu();
+        }
 
+        private void ReturnBook()
+        {
+            Console.Write("Enter book id: ");
+            int id = Convert.ToInt32(Console.ReadLine());
+
+            _regular.ReturnBook(id, _user);
+            Menu();
+        }
+        private void ShowTakenBooks()
+        {
+            _regular.ShowTakenBooks(_user);
+            Menu();
+        }
+        private void ShowReservedBooks()
+        {
+            _regular.ShowReservedBooks(_user);
             Menu();
         }
     }

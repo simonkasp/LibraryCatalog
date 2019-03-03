@@ -9,9 +9,9 @@ namespace LibraryCatalog.Users
 {
     public interface IRegularUser : IBaseUser
     {
-        void ReserveBook(Book book, IRegularUser user);
-        void TakeBook(Book book, IRegularUser user);
-        void ReturnBook(Book book, IRegularUser user);
+        void ReserveBook(int bookID, IRegularUser user);
+        void TakeBook(int id, IRegularUser user);
+        void ReturnBook(int id, IRegularUser user);
         void ShowTakenBooks(IRegularUser user);
         void ShowReservedBooks(IRegularUser user);
     }
